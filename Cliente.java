@@ -1,19 +1,25 @@
+import java.util.Scanner;
+
 public class Cliente
 {
+
+    //creo gli attributi necessari per ogni Cliente
     String nome;
     int giornoIngresso;
    
+    //creo il costruttore
     Cliente(String nome, int giornoIngresso){
         this.nome = nome;
         this.giornoIngresso = giornoIngresso;
     }
    
+    //faccio l'override del metodo toString per fargli stampare nome del Cliente e giorno di ingresso
     @Override
     public String toString(){
-        return "nome: " + this.nome + ", giorno di ingresso: " + this.giornoIngresso;
+        return "nome del Cliente: " + this.nome + ", giorno di ingresso: " + this.giornoIngresso;
     }
 
-
+    //creo il metodo trovaIndiceVuoto, che restituisce il primo indice senza oggetti dell'array camereSingole
     public static int trovaIndiceVuoto(Cliente[] camereSingole){
         for (int i = 0; i < camereSingole.length; i++){
             if (camereSingole[i] == null){
@@ -23,70 +29,124 @@ public class Cliente
         return -1;
     }
 
-
-    public static boolean checkIn(Cliente[] camereSingole, Cliente[] clienti){
+    //creo il metodo checkIn, che permette l'inserimento di nuovi clienti nelle stanze e restituisce false se l'array e' pieno o true se non e' pieno
+    public static boolean checkIn(Cliente[] camereSingole, Cliente c1){
         int indiceVuoto = trovaIndiceVuoto(camereSingole);
         if (indiceVuoto == -1){
             return false;
         }
         else{
-            camereSingole[indiceVuoto] = clienti[indiceVuoto];
+            camereSingole[indiceVuoto] = c1;
             return true;
         }
     }
 
-
-    public static int riecrcaCliente(Cliente[] camereSingole, String clienteCheckout){
+    //creo il metodo ricerca Cliente che cerca e restituisce l'indice di un Cliente inserito
+    public static int riecrcaCliente(Cliente[] camereSingole, String ClienteCheckout){
         for (int i = 0; i < camereSingole.length; i++){
-            if (camereSingole[i].nome.equals(clienteCheckout)){
-                return i;
+            if (camereSingole[i] != null){
+                if (camereSingole[i].nome.equals(ClienteCheckout)){
+                    return i;
+                }
             }
         }
         return -1;
     }
 
-
-    public static int pagamento(Cliente[] camereSingole, String clienteCheckout, int giornoAttuale){
-        if (riecrcaCliente(camereSingole, clienteCheckout) != -1){
-            return (giornoAttuale - camereSingole[riecrcaCliente(camereSingole, clienteCheckout)].giornoIngresso);
+    //creo il metodo pagamento che calcola il prezzo che deve pagare il Cliente inserito
+    public static int pagamento(Cliente[] camereSingole, String ClienteCheckout, int giornoAttuale, int prezzoANotte){
+        int clienteRicercato = riecrcaCliente(camereSingole, ClienteCheckout);
+        if (clienteRicercato != -1){
+            return ((giornoAttuale - camereSingole[riecrcaCliente(camereSingole, ClienteCheckout)].giornoIngresso) * prezzoANotte);
         }
         return -1;
     }
 
-
-    public static void checkOut(Cliente[] camereSingole, String clienteCheckout){
-        camereSingole[riecrcaCliente(camereSingole, clienteCheckout)] = null;
+    //creo il metodo checkOut che elimina il Cliente inserito dall'array camereSingole
+    public static void checkOut(Cliente[] camereSingole, String ClienteCheckout){
+        int clienteRicercato = riecrcaCliente(camereSingole, ClienteCheckout);
+        if (clienteRicercato != -1){
+            camereSingole[riecrcaCliente(camereSingole, ClienteCheckout)] = null;
+        }
     }
 
+    //creo il metodo checkOut che stampa tutte le camere libere
+    public static void stampaCamereLibere(Cliente[] camereSingole){
+        System.out.println("CAMERE LIBERE:");
+        for (int i = 0; i < camereSingole.length; i++){
+            if (camereSingole[i] == null){
+                System.out.println("- Camera " + (i + 1));
+            }
+        }
+    }
+
+    //creo il metodo checkOut che stampa tutte le camere occupate
+    public static void stampaCamereOccupate(Cliente[] camereSingole){
+        System.out.println("CAMERE OCCUPATE:");
+        for (int i = 0; i < camereSingole.length; i++){
+            if (camereSingole[i] != null){
+                System.out.println("- Camera " + (i + 1) + ", " + camereSingole[i].toString());
+            }
+        }
+    }
 
     public static void main(String[] args) {  
-        final int N = 5; //creo la costante
 
+        Scanner scanner = new Scanner(System.in);
+
+        final int N = 5; //creo la costante
 
         //creo i due array rappresentanti le camere
         Cliente[] camereSingole = new Cliente [N];
-        //Cliente[] cameredoppie = new Cliente [N];
+        //Cliente[] cameredoppie = new Cliente [N]
 
+        String selezioneMenu;//creo la variabile "selezioneMenu" per selezionare una funzione
+        String ClienteCheckout;//creo la variabile "ClienteCheckout" per inserire il Cliente che deve uscire e pagare
+        int giornoAttuale;//creo la variabile "giornoAttuale" per definire il numero di giorno attuale
+        int prezzoANotte = 300;//creo la variabile "prezzoAnotte" per definire il prezzo a notte di una camera dell'hotel
+        int prezzo;//creo la variabile "prezzo", a cui verra' assegnato il prezzo finale di checkout
 
-        //creo l'array contenente i clienti
-        Cliente c1 = new Cliente("Marco",1);
-        Cliente c2 = new Cliente("claudia",3);
-        Cliente c3 = new Cliente("Luca",7);
-        Cliente c4 = new Cliente("Antonella",5);
-        Cliente c5 = new Cliente("Daniele",2);
-        Cliente clienti[] = {c1, c2, c3, c4, c5};
-
-
-        //creo la variabile "clienteCheckout" per inserire il cliente che deve uscire e pagare
-        String clienteCheckout = "Luca";
-
-
-        //creo la variabile "giornoAttuale" per definire il numero di giorno attuale
-        int giornoAttuale = 23;
-
-
-
-
+        do{
+            System.out.println("Cosa vuoi fare? Seleziona un numero per continuare\n0) esci dal programma\n1) Check-in\n2) Check-out\n3) stampa camere libere\n4) stampa camere occupate\n");
+            selezioneMenu = scanner.nextLine();
+            switch (selezioneMenu){
+                case "1":
+                    // dichiaro l'oggetto Cliente, che conterra' tutti i nuovi clienti inseriti
+                    Cliente c1 = new Cliente(null,0);
+                    System.out.println("Inserisci il nome del cliente");
+                    c1.nome = scanner.nextLine();
+                    System.out.println("Inserisci il giorno di ingresso del cliente");
+                    c1.giornoIngresso = scanner.nextInt();
+                    scanner.nextLine();
+                    if (checkIn(camereSingole, c1) == false){
+                        System.out.println("Le camere sono tutte occupate! Il Cliente non puo' entrare");
+                    }
+                    break;
+                case "2": 
+                    System.out.println("Inserisci il nome del cliente che deve fare checkout");
+                    ClienteCheckout = scanner.nextLine();
+                    System.out.println("Inserisci il giorno del mese attuale in formato numerico");
+                    giornoAttuale = scanner.nextInt();
+                    scanner.nextLine();
+                    prezzo = pagamento(camereSingole, ClienteCheckout, giornoAttuale, prezzoANotte);
+                    if (prezzo == -1){
+                        System.out.println("Il Cliente ricercato non e' stato trovato!");
+                    }
+                    else{
+                        System.out.println("Il Cliente " + ClienteCheckout + " deve pagare " + prezzo + " euro");
+                    }
+                    checkOut(camereSingole, ClienteCheckout);
+                    break;
+                case "3":
+                    stampaCamereLibere(camereSingole);
+                    break;
+                case "4":
+                    stampaCamereOccupate(camereSingole);
+                    break;
+                default:
+                    System.out.println("hai sbagliato la selezione del menu'! Riprova");
+                case "0":
+            }
+        }while (!"0".equals(selezioneMenu));
     }
 }
-
